@@ -28,6 +28,14 @@
     var isPanelVisible = false;
     var dragState = { dragging: false, startX: 0, startY: 0, startLeft: 0, startTop: 0 };
 
+    // تابع کمکی برای جمع کردن پنل و به‌روزرسانی آیکن
+    function minimizePanel() {
+        if (!panel) return;
+        isPanelVisible = false;
+        panel.style.display = 'none';
+        if (toggleIcon) toggleIcon.innerHTML = '⚙️';
+    }
+
     function createFloatingIcon() {
         if (toggleIcon) return;
         toggleIcon = document.createElement('div');
@@ -45,9 +53,13 @@
         toggleIcon.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
         toggleIcon.addEventListener('click', function() {
             if (!panel) createPanel();
-            isPanelVisible = !isPanelVisible;
-            panel.style.display = isPanelVisible ? 'block' : 'none';
-            toggleIcon.innerHTML = isPanelVisible ? '🔧' : '⚙️';
+            if (isPanelVisible) {
+                minimizePanel();
+            } else {
+                isPanelVisible = true;
+                panel.style.display = 'block';
+                toggleIcon.innerHTML = '🔧';
+            }
         });
         document.body.appendChild(toggleIcon);
     }
@@ -63,12 +75,28 @@
             'font-family: Tahoma, sans-serif; font-size: 13px; display: none; user-select: none;'
         ].join('');
 
+        // نوار عنوان با دکمه ضربدر
         var titleBar = document.createElement('div');
-        titleBar.style.cssText = 'cursor: move; background: #f8f9fa; padding: 6px 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0; font-weight: bold; color: #333; border-bottom: 1px solid #dee2e6;';
+        titleBar.style.cssText = 'cursor: move; background: #f8f9fa; padding: 6px 30px 6px 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0; font-weight: bold; color: #333; border-bottom: 1px solid #dee2e6; position: relative;';
         titleBar.textContent = 'تنظیمات چاپ';
         titleBar.addEventListener('mousedown', startDrag);
+
+        // دکمه ضربدر
+        var closeBtn = document.createElement('span');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.cssText = 'position: absolute; top: 4px; right: 8px; font-size: 18px; font-weight: bold; color: #888; cursor: pointer; line-height: 1;';
+        closeBtn.title = 'بستن پنل';
+        closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // جلوگیری از درگ
+            minimizePanel();
+        });
+        closeBtn.addEventListener('mouseenter', function() { this.style.color = '#e74c3c'; });
+        closeBtn.addEventListener('mouseleave', function() { this.style.color = '#888'; });
+
+        titleBar.appendChild(closeBtn);
         panel.appendChild(titleBar);
 
+        // بخش حاشیه‌ها
         var secMargin = document.createElement('div');
         secMargin.innerHTML = '<b style="color:#495057;">حاشیه‌ها</b>';
         secMargin.style.marginBottom = '8px';
@@ -86,7 +114,7 @@
             lbl.style.cssText = 'width: 45px; text-align: right; margin-left: 5px; font-weight:bold; color:#495057;';
             row.appendChild(lbl);
 
-            // دکمه کاهش ۵px (سمت چپ منفی)
+            // دکمه کاهش ۵px
             var decCoarse = document.createElement('button');
             decCoarse.id = decCoarseId;
             decCoarse.textContent = '−۵';
@@ -114,7 +142,7 @@
             incFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
             row.appendChild(incFine);
 
-            // دکمه افزایش ۵px (سمت راست مثبت)
+            // دکمه افزایش ۵px
             var incCoarse = document.createElement('button');
             incCoarse.id = incCoarseId;
             incCoarse.textContent = '+۵';
@@ -139,11 +167,11 @@
         applyBtn.addEventListener('mouseleave', function() { this.style.background = '#0050ef'; });
         panel.appendChild(applyBtn);
 
-        var secFont = document.createElement('div');
-        secFont.innerHTML = '<b style="color:#495057;">فونت</b> (به‌زودی)';
-        secFont.style.marginTop = '10px';
-        secFont.style.color = '#888';
-        panel.appendChild(secFont);
+        // متن اختصاصی دوخطی
+        var footerText = document.createElement('div');
+        footerText.style.cssText = 'margin-top: 12px; text-align: center; font-size: 11px; color: #adb5bd; line-height: 1.6;';
+        footerText.innerHTML = 'اداره کل آموزش و پرورش خراسان رضوی<br>کارشناسی سنجش خلیل آباد';
+        panel.appendChild(footerText);
 
         document.body.appendChild(panel);
         attachEventListenersToPanel();
@@ -187,7 +215,7 @@
             return window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
         }
 
-        // ۱px دکمه‌های
+        // دکمه‌های ۱px
         document.getElementById('increaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTop) h.increaseTop(displays); });
         document.getElementById('decreaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTop) h.decreaseTop(displays); });
         document.getElementById('increaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottom) h.increaseBottom(displays); });
@@ -197,7 +225,7 @@
         document.getElementById('increaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseLeft) h.increaseLeft(displays); });
         document.getElementById('decreaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseLeft) h.decreaseLeft(displays); });
 
-        // ۵px دکمه‌های
+        // دکمه‌های ۵px
         document.getElementById('increaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTopCoarse) h.increaseTopCoarse(displays); });
         document.getElementById('decreaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTopCoarse) h.decreaseTopCoarse(displays); });
         document.getElementById('increaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottomCoarse) h.increaseBottomCoarse(displays); });
