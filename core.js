@@ -31,7 +31,6 @@
     var isPanelVisible = false;
     var dragState = { dragging: false, startX: 0, startY: 0, startLeft: 0, startTop: 0 };
 
-    // ساخت آیکن شناور
     function createFloatingIcon() {
         if (toggleIcon) return;
         toggleIcon = document.createElement('div');
@@ -39,20 +38,10 @@
         toggleIcon.innerHTML = '⚙️';
         toggleIcon.title = 'تنظیمات چاپ کارنامه';
         toggleIcon.style.cssText = [
-            'position: fixed;',
-            'bottom: 20px;',
-            'right: 20px;',
-            'z-index: 9999999;',
-            'width: 44px;',
-            'height: 44px;',
-            'background: #ffc107;',
-            'border-radius: 50%;',
-            'display: flex;',
-            'align-items: center;',
-            'justify-content: center;',
-            'font-size: 24px;',
-            'cursor: pointer;',
-            'box-shadow: 0 4px 8px rgba(0,0,0,0.3);',
+            'position: fixed; bottom: 20px; right: 20px; z-index: 9999999;',
+            'width: 44px; height: 44px; background: #ffc107; border-radius: 50%;',
+            'display: flex; align-items: center; justify-content: center;',
+            'font-size: 24px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3);',
             'user-select: none;'
         ].join('');
         toggleIcon.addEventListener('click', function() {
@@ -64,7 +53,6 @@
         document.body.appendChild(toggleIcon);
     }
 
-    // ساخت پنل
     function createPanel() {
         if (panel) return;
         panel = document.createElement('div');
@@ -76,14 +64,12 @@
             'font-family: Tahoma, sans-serif; font-size: 13px; display: none; user-select: none;'
         ].join('');
 
-        // نوار عنوان (قابل درگ)
         var titleBar = document.createElement('div');
         titleBar.style.cssText = 'cursor: move; background: #eee; padding: 4px 8px; margin: -10px -10px 8px -10px; border-radius: 6px 6px 0 0; font-weight: bold;';
         titleBar.textContent = 'تنظیمات چاپ';
         titleBar.addEventListener('mousedown', startDrag);
         panel.appendChild(titleBar);
 
-        // بخش حاشیه‌ها
         var secMargin = document.createElement('div');
         secMargin.innerHTML = '<b>حاشیه‌ها</b> (۱px گام)';
         secMargin.style.marginBottom = '6px';
@@ -125,7 +111,13 @@
         addSpacingRow('راست', 'increaseRightBtn', 'decreaseRightBtn', 'rightHeightDisp');
         addSpacingRow('چپ', 'increaseLeftBtn', 'decreaseLeftBtn', 'leftHeightDisp');
 
-        // بخش فونت (رزرو)
+        // دکمه اعمال فاصله‌ها
+        var applyBtn = document.createElement('button');
+        applyBtn.id = 'applySpacingBtn';
+        applyBtn.textContent = 'اعمال فاصله‌ها';
+        applyBtn.style.cssText = 'margin-top: 6px; width: 100%; padding: 4px; background: #0050ef; color: white; border: none; border-radius: 4px; cursor: pointer;';
+        panel.appendChild(applyBtn);
+
         var secFont = document.createElement('div');
         secFont.innerHTML = '<b>فونت</b> (به‌زودی)';
         secFont.style.marginTop = '8px';
@@ -133,12 +125,9 @@
         panel.appendChild(secFont);
 
         document.body.appendChild(panel);
-
-        // اتصال رویدادها پس از ساخت پنل
         attachEventListenersToPanel();
     }
 
-    // ========== درگ پنل ==========
     function startDrag(e) {
         e.preventDefault();
         dragState.dragging = true;
@@ -162,10 +151,9 @@
         window.removeEventListener('mouseup', stopDrag);
     }
 
-    // ========== اتصال event listenerها ==========
     function attachEventListenersToPanel() {
         var incTop = document.getElementById('increaseTopBtn');
-        if (!incTop) return; // پنل هنوز آماده نیست (نباید رخ دهد)
+        if (!incTop) return;
 
         var displays = {
             topHeight: document.getElementById('topHeightDisp'),
@@ -187,9 +175,14 @@
         document.getElementById('decreaseRightBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseRight) h.decreaseRight(displays); });
         document.getElementById('increaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseLeft) h.increaseLeft(displays); });
         document.getElementById('decreaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseLeft) h.decreaseLeft(displays); });
+
+        document.getElementById('applySpacingBtn').addEventListener('click', function() {
+            var block = identifyBlock();
+            var handlers = window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
+            if (handlers && handlers.applyStored) handlers.applyStored();
+        });
     }
 
-    // ========== راه‌اندازی ==========
-    createFloatingIcon();  // آیکن شناور همیشه حاضر
-    createPanel();         // پنل ساخته ولی مخفی می‌ماند
+    createFloatingIcon();
+    createPanel();
 })();
