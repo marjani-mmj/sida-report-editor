@@ -59,7 +59,7 @@
         panel.style.cssText = [
             'position: fixed; top: 100px; left: 20px; z-index: 999999;',
             'background: #ffffff; border: 1px solid #ddd; border-radius: 8px;',
-            'box-shadow: 0 8px 20px rgba(0,0,0,0.2); padding: 12px; width: 280px;',
+            'box-shadow: 0 8px 20px rgba(0,0,0,0.2); padding: 12px; width: 300px;',
             'font-family: Tahoma, sans-serif; font-size: 13px; display: none; user-select: none;'
         ].join('');
 
@@ -70,66 +70,58 @@
         panel.appendChild(titleBar);
 
         var secMargin = document.createElement('div');
-        secMargin.innerHTML = '<b style="color:#495057;">حاشیه‌ها</b> <span style="font-size:11px;color:#888;">(۱px / ۵px گام)</span>';
+        secMargin.innerHTML = '<b style="color:#495057;">حاشیه‌ها</b>';
         secMargin.style.marginBottom = '8px';
         panel.appendChild(secMargin);
 
-        // تابع ساخت یک ردیف کامل برای یک جهت (بالا، پایین، راست، چپ)
         function addFullDirectionRow(label, incFineId, decFineId, dispId, incCoarseId, decCoarseId) {
             var container = document.createElement('div');
             container.style.cssText = 'margin-bottom: 6px;';
 
-            // ردیف بالا: لیبل + دکمه‌های گام ۱px
-            var rowFine = document.createElement('div');
-            rowFine.style.cssText = 'display: flex; align-items: center; margin-bottom: 2px;';
+            var row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center;';
 
             var lbl = document.createElement('span');
             lbl.textContent = label;
             lbl.style.cssText = 'width: 45px; text-align: right; margin-left: 5px; font-weight:bold; color:#495057;';
-            rowFine.appendChild(lbl);
+            row.appendChild(lbl);
+
+            // دکمه کاهش ۵px (سمت چپ منفی)
+            var decCoarse = document.createElement('button');
+            decCoarse.id = decCoarseId;
+            decCoarse.textContent = '−۵';
+            decCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#ffc9c9; border:1px solid #ff8787; border-radius:4px; cursor:pointer; color:#c92a2a;';
+            row.appendChild(decCoarse);
 
             // دکمه کاهش ۱px
             var decFine = document.createElement('button');
             decFine.id = decFineId;
             decFine.textContent = '−';
             decFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
-            rowFine.appendChild(decFine);
+            row.appendChild(decFine);
 
             // نمایشگر
             var disp = document.createElement('div');
             disp.id = dispId;
             disp.style.cssText = 'width: 36px; text-align: center; font-weight: bold; font-size:14px; color: #0050ef;';
             disp.textContent = '0';
-            rowFine.appendChild(disp);
+            row.appendChild(disp);
 
             // دکمه افزایش ۱px
             var incFine = document.createElement('button');
             incFine.id = incFineId;
             incFine.textContent = '+';
             incFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
-            rowFine.appendChild(incFine);
+            row.appendChild(incFine);
 
-            // برچسب گام ۵px
-            var coarseLabel = document.createElement('span');
-            coarseLabel.textContent = '۵px';
-            coarseLabel.style.cssText = 'font-size:10px; color:#888; margin:0 4px;';
-            rowFine.appendChild(coarseLabel);
-
-            // دکمه کاهش ۵px
-            var decCoarse = document.createElement('button');
-            decCoarse.id = decCoarseId;
-            decCoarse.textContent = '−۵';
-            decCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#ffc9c9; border:1px solid #ff8787; border-radius:4px; cursor:pointer; color:#c92a2a;';
-            rowFine.appendChild(decCoarse);
-
-            // دکمه افزایش ۵px
+            // دکمه افزایش ۵px (سمت راست مثبت)
             var incCoarse = document.createElement('button');
             incCoarse.id = incCoarseId;
             incCoarse.textContent = '+۵';
             incCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#b2f2bb; border:1px solid #51cf66; border-radius:4px; cursor:pointer; color:#2b8a3e;';
-            rowFine.appendChild(incCoarse);
+            row.appendChild(incCoarse);
 
-            container.appendChild(rowFine);
+            container.appendChild(row);
             panel.appendChild(container);
         }
 
@@ -195,7 +187,7 @@
             return window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
         }
 
-        // اتصال دکمه‌های ۱px
+        // ۱px دکمه‌های
         document.getElementById('increaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTop) h.increaseTop(displays); });
         document.getElementById('decreaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTop) h.decreaseTop(displays); });
         document.getElementById('increaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottom) h.increaseBottom(displays); });
@@ -205,7 +197,7 @@
         document.getElementById('increaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseLeft) h.increaseLeft(displays); });
         document.getElementById('decreaseLeftBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseLeft) h.decreaseLeft(displays); });
 
-        // اتصال دکمه‌های ۵px (گام بزرگ)
+        // ۵px دکمه‌های
         document.getElementById('increaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTopCoarse) h.increaseTopCoarse(displays); });
         document.getElementById('decreaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTopCoarse) h.decreaseTopCoarse(displays); });
         document.getElementById('increaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottomCoarse) h.increaseBottomCoarse(displays); });
