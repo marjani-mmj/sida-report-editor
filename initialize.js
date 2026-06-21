@@ -1,6 +1,6 @@
 // initialize.js
 (function() {
-    var basePath = 'https://marjani-mmj.github.io/initializeConsol/';
+    var basePath = 'https://marjani-mmj.github.io/sida-report-editor/';
 
     var scripts = [
         'core.js',
