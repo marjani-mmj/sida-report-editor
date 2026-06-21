@@ -170,7 +170,7 @@
         // متن اختصاصی دوخطی
         var footerText = document.createElement('div');
         footerText.style.cssText = 'margin-top: 12px; text-align: center; font-size: 11px; color: #adb5bd; line-height: 1.6;';
-        footerText.innerHTML = 'اداره کل آموزش و پرورش خراسان رضوی<br>کارشناسی سنجش خلیل آباد';
+        footerText.innerHTML = 'اداره کل آموزش و پرورش خراسان رضوی<br>کارشناسی سنجش خلیل آباد- مرجانی';
         panel.appendChild(footerText);
 
         document.body.appendChild(panel);
