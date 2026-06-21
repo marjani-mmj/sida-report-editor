@@ -90,7 +90,6 @@
 
     window.registerSection('daftsrNatayej', {
         spacing: {
-            // گام ۱px
             increaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', 1, d.topHeight); },
             decreaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', -1, d.topHeight); },
             increaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', 1, d.bottomHeight); },
@@ -100,7 +99,6 @@
             increaseLeft: function(d) { adjustLeftMargin(1); },
             decreaseLeft: function(d) { adjustLeftMargin(-1); },
 
-            // گام ۵px (دکمه‌های درشت)
             increaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', 5, d.topHeight); },
             decreaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', -5, d.topHeight); },
             increaseBottomCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', 5, d.bottomHeight); },
