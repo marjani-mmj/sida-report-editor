@@ -1,7 +1,6 @@
 // initialize.js
 (function() {
     var basePath = 'https://marjani-mmj.github.io/sida-report-editor/';
-
     var scripts = [
         'core.js',
         'section-daftsrNatayej.js',
@@ -25,7 +24,6 @@
         });
     }
 
-    // زنجیره بارگذاری
     scripts.reduce(function(promise, script) {
         return promise.then(function() {
             return loadScript(script);
