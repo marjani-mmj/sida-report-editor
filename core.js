@@ -127,13 +127,12 @@
         btn.style.color = 'white';
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
-        btn.style.display = 'none'; // مخفی اولیه
+        btn.style.display = 'none';
         btn.onclick = createButtonGroups;
         document.body.appendChild(btn);
     }
 
     function createButtonGroups() {
-        // حذف گروه قبلی اگر وجود داشت
         var old = document.getElementById('button-groups');
         if (old) old.remove();
 
@@ -159,10 +158,8 @@
             return el;
         }
 
-        // گروه فونت بالا
         var g1 = createEl('div', 'group', '', container);
         createEl('div', 'group-title', 'فونت بالا', g1);
-
         var r1 = createEl('div', 'row', '', g1);
         var sp1 = createEl('span', '', 'تیتر', r1);
         sp1.style.width = '25px'; sp1.style.marginRight = '5px'; sp1.style.display = 'inline-block';
@@ -181,7 +178,6 @@
         db2.onclick = function() { callFontHandler('decreaseFontSizeTopInfomark'); };
         createEl('div', '', ':', r2).id = 'fontSizeTopInfomark';
 
-        // گروه فونت وسط
         var g2 = createEl('div', 'group', '', container);
         createEl('div', 'group-title', 'فونت وسط', g2);
         var r3 = createEl('div', 'row', '', g2);
@@ -193,7 +189,6 @@
         db3.onclick = function() { callFontHandler('decreaseFontSizeMiddle'); };
         createEl('div', '', ':', r3).id = 'fontSizeMiddle';
 
-        // گروه فونت پایین
         var g3 = createEl('div', 'group', '', container);
         createEl('div', 'group-title', 'فونت پایین', g3);
         var r4 = createEl('div', 'row', '', g3);
@@ -214,7 +209,6 @@
         db5.onclick = function() { callFontHandler('decreaseFontSizeBottomInfomark'); };
         createEl('div', '', ':', r5).id = 'fontSizeBottomInfomark';
 
-        // دکمه بستن
         var closeBtn = createEl('button', 'close-button', 'بستن دکمه‌ها', container);
         closeBtn.style.marginTop = '8px';
         closeBtn.onclick = function() {
@@ -228,16 +222,14 @@
         if (fontBtn) fontBtn.style.display = 'none';
     }
 
-    // تابع کمکی فراخوانی فونت از رجیستری
     function callFontHandler(action) {
         var block = identifyBlock();
         var handlers = window.handlersRegistry[block];
         if (handlers && handlers.fonts && typeof handlers.fonts[action] === 'function') {
-            handlers.fonts[action](); // تابع بدون پارامتر، id را از DOM می‌خواند
+            handlers.fonts[action]();
         }
     }
 
-    // ***** نصب رویدادهای حاشیه و فونت *****
     function addEventListeners() {
         var displays = {
             topHeight: document.getElementById('topHeightDisplay'),
@@ -251,42 +243,33 @@
             return window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
         }
 
-        // حاشیه‌ها
         document.getElementById('increaseTopButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.increaseTop) h.increaseTop(displays);
+            var h = getHandlers(); if (h && h.increaseTop) h.increaseTop(displays);
         });
         document.getElementById('decreaseTopButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.decreaseTop) h.decreaseTop(displays);
+            var h = getHandlers(); if (h && h.decreaseTop) h.decreaseTop(displays);
         });
         document.getElementById('increaseBottomButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.increaseBottom) h.increaseBottom(displays);
+            var h = getHandlers(); if (h && h.increaseBottom) h.increaseBottom(displays);
         });
         document.getElementById('decreaseBottomButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.decreaseBottom) h.decreaseBottom(displays);
+            var h = getHandlers(); if (h && h.decreaseBottom) h.decreaseBottom(displays);
         });
         document.getElementById('increaseRightButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.increaseRight) h.increaseRight(displays);
+            var h = getHandlers(); if (h && h.increaseRight) h.increaseRight(displays);
         });
         document.getElementById('decreaseRightButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.decreaseRight) h.decreaseRight(displays);
+            var h = getHandlers(); if (h && h.decreaseRight) h.decreaseRight(displays);
         });
         document.getElementById('increaseLeftButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.increaseLeft) h.increaseLeft(displays);
+            var h = getHandlers(); if (h && h.increaseLeft) h.increaseLeft(displays);
         });
         document.getElementById('decreaseLeftButton').addEventListener('click', function() {
-            var h = getHandlers();
-            if (h && h.decreaseLeft) h.decreaseLeft(displays);
+            var h = getHandlers(); if (h && h.decreaseLeft) h.decreaseLeft(displays);
         });
     }
 
-    // ***** راه‌اندازی *****
+    // راه‌اندازی
     createButtons();
     createDisplays();
     setButtonPositions();
