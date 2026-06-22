@@ -2,13 +2,13 @@
 (function() {
     'use strict';
 
-    var lastTop = 0, lastBottom = 0, lastRight = 0, lastLeft = 0;
+    var lastTop = 0, lastBottom = 0, lastRight = 0, lastWidth = 1060;
 
     function initStoredValues() {
         var cards = document.querySelectorAll('.ng-scope[ng-repeat="rowItem in model.ksarnamehs"]');
         if (cards.length > 0) {
             lastRight = parseInt(window.getComputedStyle(cards[0]).marginRight) || 0;
-            lastLeft = parseInt(window.getComputedStyle(cards[0]).marginLeft) || 0;
+            lastWidth = parseInt(window.getComputedStyle(cards[0]).width) || 1060;
         }
         updateDisplays();
     }
@@ -17,7 +17,7 @@
         var dt = document.getElementById('topHeightDisp'); if (dt) dt.textContent = lastTop;
         var db = document.getElementById('bottomHeightDisp'); if (db) db.textContent = lastBottom;
         var dr = document.getElementById('rightHeightDisp'); if (dr) dr.textContent = lastRight;
-        var dl = document.getElementById('leftHeightDisp'); if (dl) dl.textContent = lastLeft;
+        var dw = document.getElementById('widthDisp'); if (dw) dw.textContent = lastWidth;
     }
 
     function ensureSpacersExist() {
@@ -60,16 +60,18 @@
         if (display) display.textContent = newVal;
     }
 
-    function adjustLeftMargin(amount) {
+    // تنظیم پهنا (width) به‌جای margin-left
+    function adjustWidth(amount) {
         var blocks = document.querySelectorAll('.ng-scope[ng-repeat="rowItem in model.ksarnamehs"]');
-        var newVal = 0;
+        var newVal = lastWidth; // شروع از مقدار ذخیره‌شده
         blocks.forEach(function(block) {
-            var cur = parseInt(window.getComputedStyle(block).marginLeft) || 0;
+            var cur = parseInt(window.getComputedStyle(block).width) || lastWidth;
             newVal = cur + amount;
-            block.style.setProperty('margin-left', newVal + 'px', 'important');
+            if (newVal < 500) newVal = 500; // حداقل عرض
+            block.style.setProperty('width', newVal + 'px', 'important');
         });
-        lastLeft = newVal;
-        var display = document.getElementById('leftHeightDisp');
+        lastWidth = newVal;
+        var display = document.getElementById('widthDisp');
         if (display) display.textContent = newVal;
     }
 
@@ -79,7 +81,7 @@
         document.querySelectorAll('.custom-spacer-bottom').forEach(function(s) { s.style.height = lastBottom + 'px'; });
         document.querySelectorAll('.ng-scope[ng-repeat="rowItem in model.ksarnamehs"]').forEach(function(card) {
             card.style.setProperty('margin-right', lastRight + 'px', 'important');
-            card.style.setProperty('margin-left', lastLeft + 'px', 'important');
+            card.style.setProperty('width', lastWidth + 'px', 'important');
         });
         updateDisplays();
     }
@@ -90,23 +92,26 @@
 
     window.registerSection('daftsrNatayej', {
         spacing: {
+            // بالا
             increaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', 1, d.topHeight); },
             decreaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', -1, d.topHeight); },
-            increaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', 1, d.bottomHeight); },
-            decreaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', -1, d.bottomHeight); },
-            increaseRight: function(d) { adjustRightMargin(1); },
-            decreaseRight: function(d) { adjustRightMargin(-1); },
-            increaseLeft: function(d) { adjustLeftMargin(1); },
-            decreaseLeft: function(d) { adjustLeftMargin(-1); },
-
             increaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', 5, d.topHeight); },
             decreaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-top', -5, d.topHeight); },
+            // پایین
+            increaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', 1, d.bottomHeight); },
+            decreaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', -1, d.bottomHeight); },
             increaseBottomCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', 5, d.bottomHeight); },
             decreaseBottomCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.custom-spacer-bottom', -5, d.bottomHeight); },
+            // راست
+            increaseRight: function(d) { adjustRightMargin(1); },
+            decreaseRight: function(d) { adjustRightMargin(-1); },
             increaseRightCoarse: function(d) { adjustRightMargin(5); },
             decreaseRightCoarse: function(d) { adjustRightMargin(-5); },
-            increaseLeftCoarse: function(d) { adjustLeftMargin(5); },
-            decreaseLeftCoarse: function(d) { adjustLeftMargin(-5); },
+            // پهنا (جایگزین چپ)
+            increaseWidth: function(d) { adjustWidth(1); },
+            decreaseWidth: function(d) { adjustWidth(-1); },
+            increaseWidthCoarse: function(d) { adjustWidth(5); },
+            decreaseWidthCoarse: function(d) { adjustWidth(-5); },
 
             applyStored: applyStored
         },
