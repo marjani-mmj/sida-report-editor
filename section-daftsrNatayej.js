@@ -60,15 +60,19 @@
         if (display) display.textContent = newVal;
     }
 
-    // تنظیم پهنا (width) به‌جای margin-left
+    // تنظیم پهنا (width) و بازنشانی max-width
     function adjustWidth(amount) {
         var blocks = document.querySelectorAll('.ng-scope[ng-repeat="rowItem in model.ksarnamehs"]');
-        var newVal = lastWidth; // شروع از مقدار ذخیره‌شده
+        var newVal = lastWidth;
         blocks.forEach(function(block) {
             var cur = parseInt(window.getComputedStyle(block).width) || lastWidth;
             newVal = cur + amount;
-            if (newVal < 500) newVal = 500; // حداقل عرض
+            // محدوده مجاز: حداقل 500px و حداکثر 2000px
+            if (newVal < 500) newVal = 500;
+            if (newVal > 2000) newVal = 2000;
             block.style.setProperty('width', newVal + 'px', 'important');
+            // بازنشانی max-width برای جلوگیری از توقف افزایش
+            block.style.setProperty('max-width', newVal + 'px', 'important');
         });
         lastWidth = newVal;
         var display = document.getElementById('widthDisp');
@@ -82,6 +86,7 @@
         document.querySelectorAll('.ng-scope[ng-repeat="rowItem in model.ksarnamehs"]').forEach(function(card) {
             card.style.setProperty('margin-right', lastRight + 'px', 'important');
             card.style.setProperty('width', lastWidth + 'px', 'important');
+            card.style.setProperty('max-width', lastWidth + 'px', 'important');
         });
         updateDisplays();
     }
@@ -107,7 +112,7 @@
             decreaseRight: function(d) { adjustRightMargin(-1); },
             increaseRightCoarse: function(d) { adjustRightMargin(5); },
             decreaseRightCoarse: function(d) { adjustRightMargin(-5); },
-            // پهنا (جایگزین چپ)
+            // پهنا (با بازنشانی max-width)
             increaseWidth: function(d) { adjustWidth(1); },
             decreaseWidth: function(d) { adjustWidth(-1); },
             increaseWidthCoarse: function(d) { adjustWidth(5); },
