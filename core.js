@@ -9,7 +9,9 @@
 
     function identifyBlock() {
         var selectors = [
-            { sel: '.reportTosifiSearch.print-panel', name: 'reportTosifi' },   // ← اول
+            // انتخابگر دقیق برای گزارش پیشرفت تحصیلی (فقط در آن صفحه وجود دارد)
+            { sel: '.row.from-load.page-info.from-validation.reportTosifiSearch.print-panel', name: 'reportTosifi' },
+            // انتخابگر اصلی کارنامه‌ها (باید بعد از گزارش باشد تا اگر گزارش باز بود، اشتباه نشود)
             { sel: '.container > .ng-scope', name: 'daftsrNatayej' },
             { sel: '.modal-body.main > .col-md-12.p-0.m-0.panel-body-print', name: 'sarbarg', extra: function(el) { return !el.querySelector('table.table.table-bordered.table-striped'); } },
             { sel: '#panel-print-rokesh > .col-md-12.p-0.m-0.panel-body-print.main', name: 'rookeshKoli' },
@@ -98,7 +100,6 @@
         secMargin.style.marginBottom = '8px';
         panel.appendChild(secMargin);
 
-        // تابع ساخت ردیف (پارامترهای دکمه‌ها طبق ترتیب: کاهش ۵px, کاهش ۱px, نمایشگر, افزایش ۱px, افزایش ۵px)
         function addDirectionRow(label, incFineId, decFineId, dispId, incCoarseId, decCoarseId) {
             var container = document.createElement('div');
             container.style.cssText = 'margin-bottom: 6px;';
@@ -110,35 +111,30 @@
             lbl.style.cssText = 'width: 45px; text-align: right; margin-left: 5px; font-weight:bold; color:#495057;';
             row.appendChild(lbl);
 
-            // دکمه کاهش ۵px
             var decCoarse = document.createElement('button');
             decCoarse.id = decCoarseId;
             decCoarse.textContent = '−۵';
             decCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#ffc9c9; border:1px solid #ff8787; border-radius:4px; cursor:pointer; color:#c92a2a;';
             row.appendChild(decCoarse);
 
-            // دکمه کاهش ۱px
             var decFine = document.createElement('button');
             decFine.id = decFineId;
             decFine.textContent = '−';
             decFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
             row.appendChild(decFine);
 
-            // نمایشگر
             var disp = document.createElement('div');
             disp.id = dispId;
             disp.style.cssText = 'width: 36px; text-align: center; font-weight: bold; font-size:14px; color: #0050ef;';
             disp.textContent = '0';
             row.appendChild(disp);
 
-            // دکمه افزایش ۱px
             var incFine = document.createElement('button');
             incFine.id = incFineId;
             incFine.textContent = '+';
             incFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
             row.appendChild(incFine);
 
-            // دکمه افزایش ۵px
             var incCoarse = document.createElement('button');
             incCoarse.id = incCoarseId;
             incCoarse.textContent = '+۵';
@@ -149,14 +145,11 @@
             panel.appendChild(container);
         }
 
-        // بالا، پایین، راست بدون تغییر
         addDirectionRow('بالا', 'increaseTopBtn', 'decreaseTopBtn', 'topHeightDisp', 'increaseTopCoarseBtn', 'decreaseTopCoarseBtn');
         addDirectionRow('پایین', 'increaseBottomBtn', 'decreaseBottomBtn', 'bottomHeightDisp', 'increaseBottomCoarseBtn', 'decreaseBottomCoarseBtn');
         addDirectionRow('راست', 'increaseRightBtn', 'decreaseRightBtn', 'rightHeightDisp', 'increaseRightCoarseBtn', 'decreaseRightCoarseBtn');
-        // به‌جای چپ، ردیف پهنا
         addDirectionRow('پهنا', 'increaseWidthBtn', 'decreaseWidthBtn', 'widthDisp', 'increaseWidthCoarseBtn', 'decreaseWidthCoarseBtn');
 
-        // دکمه اعمال فاصله‌ها
         var applyBtn = document.createElement('button');
         applyBtn.id = 'applySpacingBtn';
         applyBtn.textContent = 'اعمال فاصله‌ها';
@@ -212,25 +205,21 @@
             return window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
         }
 
-        // بالا
         document.getElementById('increaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTop) h.increaseTop(displays); });
         document.getElementById('decreaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTop) h.decreaseTop(displays); });
         document.getElementById('increaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTopCoarse) h.increaseTopCoarse(displays); });
         document.getElementById('decreaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTopCoarse) h.decreaseTopCoarse(displays); });
 
-        // پایین
         document.getElementById('increaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottom) h.increaseBottom(displays); });
         document.getElementById('decreaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseBottom) h.decreaseBottom(displays); });
         document.getElementById('increaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottomCoarse) h.increaseBottomCoarse(displays); });
         document.getElementById('decreaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseBottomCoarse) h.decreaseBottomCoarse(displays); });
 
-        // راست
         document.getElementById('increaseRightBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseRight) h.increaseRight(displays); });
         document.getElementById('decreaseRightBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseRight) h.decreaseRight(displays); });
         document.getElementById('increaseRightCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseRightCoarse) h.increaseRightCoarse(displays); });
         document.getElementById('decreaseRightCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseRightCoarse) h.decreaseRightCoarse(displays); });
 
-        // پهنا (جایگزین چپ)
         document.getElementById('increaseWidthBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseWidth) h.increaseWidth(displays); });
         document.getElementById('decreaseWidthBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseWidth) h.decreaseWidth(displays); });
         document.getElementById('increaseWidthCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseWidthCoarse) h.increaseWidthCoarse(displays); });
