@@ -8,7 +8,8 @@
         'section-rookeshKoli.js',
         'section-rookeshPayeei.js',
         'section-polomp.js',
-        'section-amarKoli.js'
+        'section-amarKoli.js',
+        'section-reportTosifi.js'
     ];
 
     function loadScript(src) {
