@@ -14,7 +14,8 @@
             { sel: '#panel-print-rokesh > .col-md-12.p-0.m-0.panel-body-print.main', name: 'rookeshKoli' },
             { sel: '.col-md-12.panel-body-print > .ng-scope[ng-repeat="items in item"]', name: 'rookeshPayeei' },
             { sel: '.modal-body.main#print-content > .col-md-12.main.panel-body-print', name: 'polomp' },
-            { sel: '.modal-body.main#print-content > .col-md-12.p-0.m-0.panel-body-print.panel-total-row > table.table.table-bordered.table-striped', name: 'amarKoli' }
+            { sel: '.modal-body.main#print-content > .col-md-12.p-0.m-0.panel-body-print.panel-total-row > table.table.table-bordered.table-striped', name: 'amarKoli' },
+            { sel: '.reportTosifiSearch.print-panel', name: 'reportTosifi' }
         ];
         for (var i = 0; i < selectors.length; i++) {
             var el = document.querySelector(selectors[i].sel);
