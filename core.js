@@ -8,10 +8,8 @@
     };
 
     function identifyBlock() {
+        // انتخابگرهای اصلی (کارنامه و سایر بخش‌ها - بدون گزارش)
         var selectors = [
-            // انتخابگر دقیق برای گزارش پیشرفت تحصیلی (فقط در آن صفحه وجود دارد)
-            { sel: '.row.from-load.page-info.from-validation.reportTosifiSearch.print-panel', name: 'reportTosifi' },
-            // انتخابگر اصلی کارنامه‌ها (باید بعد از گزارش باشد تا اگر گزارش باز بود، اشتباه نشود)
             { sel: '.container > .ng-scope', name: 'daftsrNatayej' },
             { sel: '.modal-body.main > .col-md-12.p-0.m-0.panel-body-print', name: 'sarbarg', extra: function(el) { return !el.querySelector('table.table.table-bordered.table-striped'); } },
             { sel: '#panel-print-rokesh > .col-md-12.p-0.m-0.panel-body-print.main', name: 'rookeshKoli' },
@@ -37,6 +35,8 @@
         panel.style.display = 'none';
         if (toggleIcon) toggleIcon.innerHTML = '⚙️';
     }
+    // در اختیار پنل گزارش قرار می‌دهیم
+    window.minimizeMainPanel = minimizePanel;
 
     function createFloatingIcon() {
         if (toggleIcon) return;
@@ -58,6 +58,8 @@
             if (isPanelVisible) {
                 minimizePanel();
             } else {
+                // بستن پنل گزارش در صورت باز بودن
+                if (window.minimizeReportPanel) window.minimizeReportPanel();
                 isPanelVisible = true;
                 panel.style.display = 'block';
                 toggleIcon.innerHTML = '🔧';
