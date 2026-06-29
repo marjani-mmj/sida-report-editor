@@ -1,248 +1,134 @@
-// core.js
+// section-reportTosifi.js
 (function() {
     'use strict';
 
-    window.handlersRegistry = {};
-    window.registerSection = function(blockName, handlers) {
-        window.handlersRegistry[blockName] = handlers;
-    };
+    var lastTop = 0, lastBottom = 0, lastRight = 0, lastWidth = 1090;
 
-    function identifyBlock() {
-        var selectors = [
-            { sel: '.reportTosifiSearch.print-panel', name: 'reportTosifi' },   // ← اول
-            { sel: '.container > .ng-scope', name: 'daftsrNatayej' },
-            { sel: '.modal-body.main > .col-md-12.p-0.m-0.panel-body-print', name: 'sarbarg', extra: function(el) { return !el.querySelector('table.table.table-bordered.table-striped'); } },
-            { sel: '#panel-print-rokesh > .col-md-12.p-0.m-0.panel-body-print.main', name: 'rookeshKoli' },
-            { sel: '.col-md-12.panel-body-print > .ng-scope[ng-repeat="items in item"]', name: 'rookeshPayeei' },
-            { sel: '.modal-body.main#print-content > .col-md-12.main.panel-body-print', name: 'polomp' },
-            { sel: '.modal-body.main#print-content > .col-md-12.p-0.m-0.panel-body-print.panel-total-row > table.table.table-bordered.table-striped', name: 'amarKoli' }
-        ];
-        for (var i = 0; i < selectors.length; i++) {
-            var el = document.querySelector(selectors[i].sel);
-            if (el && (!selectors[i].extra || selectors[i].extra(el))) return selectors[i].name;
+    function initStoredValues() {
+        var cards = document.querySelectorAll('[ng-repeat="rowItem in dataItems"]');
+        if (cards.length > 0) {
+            var firstCard = cards[0];
+            lastRight = parseInt(window.getComputedStyle(firstCard).marginRight) || 0;
+            lastWidth = parseInt(window.getComputedStyle(firstCard).width) || 1090;
         }
-        return 0;
+        updateDisplays();
     }
 
-    var panel = null;
-    var toggleIcon = null;
-    var isPanelVisible = false;
-    var dragState = { dragging: false, startX: 0, startY: 0, startLeft: 0, startTop: 0 };
-
-    function minimizePanel() {
-        if (!panel) return;
-        isPanelVisible = false;
-        panel.style.display = 'none';
-        if (toggleIcon) toggleIcon.innerHTML = '⚙️';
+    function updateDisplays() {
+        var dt = document.getElementById('topHeightDisp'); if (dt) dt.textContent = lastTop;
+        var db = document.getElementById('bottomHeightDisp'); if (db) db.textContent = lastBottom;
+        var dr = document.getElementById('rightHeightDisp'); if (dr) dr.textContent = lastRight;
+        var dw = document.getElementById('widthDisp'); if (dw) dw.textContent = lastWidth;
     }
 
-    function createFloatingIcon() {
-        if (toggleIcon) return;
-        toggleIcon = document.createElement('div');
-        toggleIcon.id = 'sida-floating-toggle';
-        toggleIcon.innerHTML = '⚙️';
-        toggleIcon.title = 'تنظیمات چاپ کارنامه';
-        toggleIcon.style.cssText = [
-            'position: fixed; bottom: 20px; right: 20px; z-index: 9999999;',
-            'width: 48px; height: 48px; background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);',
-            'border-radius: 50%; display: flex; align-items: center; justify-content: center;',
-            'font-size: 26px; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.4);',
-            'user-select: none; transition: transform 0.2s;'
-        ].join('');
-        toggleIcon.addEventListener('mouseenter', function() { this.style.transform = 'scale(1.1)'; });
-        toggleIcon.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
-        toggleIcon.addEventListener('click', function() {
-            if (!panel) createPanel();
-            if (isPanelVisible) {
-                minimizePanel();
-            } else {
-                isPanelVisible = true;
-                panel.style.display = 'block';
-                toggleIcon.innerHTML = '🔧';
-            }
-        });
-        document.body.appendChild(toggleIcon);
-    }
+    function ensureSpacersExist() {
+        if (document.querySelector('.reportTosifi-spacer-top')) return;
 
-    function createPanel() {
-        if (panel) return;
-        panel = document.createElement('div');
-        panel.id = 'sida-editor-panel';
-        panel.style.cssText = [
-            'position: fixed; top: 100px; left: 20px; z-index: 999999;',
-            'background: #ffffff; border: 1px solid #ddd; border-radius: 8px;',
-            'box-shadow: 0 8px 20px rgba(0,0,0,0.2); padding: 12px; width: 300px;',
-            'font-family: Tahoma, sans-serif; font-size: 13px; display: none; user-select: none;'
-        ].join('');
+        var cards = document.querySelectorAll('[ng-repeat="rowItem in dataItems"]');
+        cards.forEach(function(card) {
+            var topSpacer = document.createElement('div');
+            topSpacer.className = 'reportTosifi-spacer reportTosifi-spacer-top';
+            topSpacer.style.height = '0px';
+            card.parentNode.insertBefore(topSpacer, card);
 
-        var titleBar = document.createElement('div');
-        titleBar.style.cssText = 'cursor: move; background: #f8f9fa; padding: 6px 30px 6px 10px; margin: -12px -12px 10px -12px; border-radius: 8px 8px 0 0; font-weight: bold; color: #333; border-bottom: 1px solid #dee2e6; position: relative;';
-        titleBar.textContent = 'تنظیمات چاپ';
-        titleBar.addEventListener('mousedown', startDrag);
-
-        var closeBtn = document.createElement('span');
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cssText = 'position: absolute; top: 4px; right: 8px; font-size: 18px; font-weight: bold; color: #888; cursor: pointer; line-height: 1;';
-        closeBtn.title = 'بستن پنل';
-        closeBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            minimizePanel();
-        });
-        closeBtn.addEventListener('mouseenter', function() { this.style.color = '#e74c3c'; });
-        closeBtn.addEventListener('mouseleave', function() { this.style.color = '#888'; });
-        titleBar.appendChild(closeBtn);
-        panel.appendChild(titleBar);
-
-        var secMargin = document.createElement('div');
-        secMargin.innerHTML = '<b style="color:#495057;">حاشیه‌ها</b>';
-        secMargin.style.marginBottom = '8px';
-        panel.appendChild(secMargin);
-
-        // تابع ساخت ردیف (پارامترهای دکمه‌ها طبق ترتیب: کاهش ۵px, کاهش ۱px, نمایشگر, افزایش ۱px, افزایش ۵px)
-        function addDirectionRow(label, incFineId, decFineId, dispId, incCoarseId, decCoarseId) {
-            var container = document.createElement('div');
-            container.style.cssText = 'margin-bottom: 6px;';
-            var row = document.createElement('div');
-            row.style.cssText = 'display: flex; align-items: center;';
-
-            var lbl = document.createElement('span');
-            lbl.textContent = label;
-            lbl.style.cssText = 'width: 45px; text-align: right; margin-left: 5px; font-weight:bold; color:#495057;';
-            row.appendChild(lbl);
-
-            // دکمه کاهش ۵px
-            var decCoarse = document.createElement('button');
-            decCoarse.id = decCoarseId;
-            decCoarse.textContent = '−۵';
-            decCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#ffc9c9; border:1px solid #ff8787; border-radius:4px; cursor:pointer; color:#c92a2a;';
-            row.appendChild(decCoarse);
-
-            // دکمه کاهش ۱px
-            var decFine = document.createElement('button');
-            decFine.id = decFineId;
-            decFine.textContent = '−';
-            decFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
-            row.appendChild(decFine);
-
-            // نمایشگر
-            var disp = document.createElement('div');
-            disp.id = dispId;
-            disp.style.cssText = 'width: 36px; text-align: center; font-weight: bold; font-size:14px; color: #0050ef;';
-            disp.textContent = '0';
-            row.appendChild(disp);
-
-            // دکمه افزایش ۱px
-            var incFine = document.createElement('button');
-            incFine.id = incFineId;
-            incFine.textContent = '+';
-            incFine.style.cssText = 'width: 28px; height: 28px; font-size: 16px; font-weight:bold; line-height:1; margin: 0 2px; background:#e9ecef; border:1px solid #ced4da; border-radius:4px; cursor:pointer; color:#495057;';
-            row.appendChild(incFine);
-
-            // دکمه افزایش ۵px
-            var incCoarse = document.createElement('button');
-            incCoarse.id = incCoarseId;
-            incCoarse.textContent = '+۵';
-            incCoarse.style.cssText = 'width: 32px; height: 28px; font-size: 13px; font-weight:bold; line-height:1; margin: 0 1px; background:#b2f2bb; border:1px solid #51cf66; border-radius:4px; cursor:pointer; color:#2b8a3e;';
-            row.appendChild(incCoarse);
-
-            container.appendChild(row);
-            panel.appendChild(container);
-        }
-
-        // بالا، پایین، راست بدون تغییر
-        addDirectionRow('بالا', 'increaseTopBtn', 'decreaseTopBtn', 'topHeightDisp', 'increaseTopCoarseBtn', 'decreaseTopCoarseBtn');
-        addDirectionRow('پایین', 'increaseBottomBtn', 'decreaseBottomBtn', 'bottomHeightDisp', 'increaseBottomCoarseBtn', 'decreaseBottomCoarseBtn');
-        addDirectionRow('راست', 'increaseRightBtn', 'decreaseRightBtn', 'rightHeightDisp', 'increaseRightCoarseBtn', 'decreaseRightCoarseBtn');
-        // به‌جای چپ، ردیف پهنا
-        addDirectionRow('پهنا', 'increaseWidthBtn', 'decreaseWidthBtn', 'widthDisp', 'increaseWidthCoarseBtn', 'decreaseWidthCoarseBtn');
-
-        // دکمه اعمال فاصله‌ها
-        var applyBtn = document.createElement('button');
-        applyBtn.id = 'applySpacingBtn';
-        applyBtn.textContent = 'اعمال فاصله‌ها';
-        applyBtn.style.cssText = 'margin-top: 10px; width: 100%; padding: 6px; background: #0050ef; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;';
-        applyBtn.addEventListener('mouseenter', function() { this.style.background = '#003ecb'; });
-        applyBtn.addEventListener('mouseleave', function() { this.style.background = '#0050ef'; });
-        panel.appendChild(applyBtn);
-
-        var footerText = document.createElement('div');
-        footerText.style.cssText = 'margin-top: 12px; text-align: center; font-size: 11px; color: #adb5bd; line-height: 1.6;';
-        footerText.innerHTML = 'اداره کل آموزش و پرورش خراسان رضوی<br>آموزش و پرورش خلیل آباد <br>کارشناسی سنجش - marjani.mmj@gmail.com';
-        panel.appendChild(footerText);
-
-        document.body.appendChild(panel);
-        attachEventListenersToPanel();
-    }
-
-    function startDrag(e) {
-        e.preventDefault();
-        dragState.dragging = true;
-        dragState.startX = e.clientX;
-        dragState.startY = e.clientY;
-        dragState.startLeft = panel.offsetLeft;
-        dragState.startTop = panel.offsetTop;
-        window.addEventListener('mousemove', onDrag);
-        window.addEventListener('mouseup', stopDrag);
-    }
-
-    function onDrag(e) {
-        if (!dragState.dragging) return;
-        panel.style.left = (dragState.startLeft + e.clientX - dragState.startX) + 'px';
-        panel.style.top = (dragState.startTop + e.clientY - dragState.startY) + 'px';
-    }
-
-    function stopDrag() {
-        dragState.dragging = false;
-        window.removeEventListener('mousemove', onDrag);
-        window.removeEventListener('mouseup', stopDrag);
-    }
-
-    function attachEventListenersToPanel() {
-        if (!document.getElementById('increaseTopBtn')) return;
-
-        var displays = {
-            topHeight: document.getElementById('topHeightDisp'),
-            bottomHeight: document.getElementById('bottomHeightDisp'),
-            rightHeight: document.getElementById('rightHeightDisp'),
-            widthDisp: document.getElementById('widthDisp')
-        };
-
-        function getHandlers() {
-            var block = identifyBlock();
-            return window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
-        }
-
-        // بالا
-        document.getElementById('increaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTop) h.increaseTop(displays); });
-        document.getElementById('decreaseTopBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTop) h.decreaseTop(displays); });
-        document.getElementById('increaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseTopCoarse) h.increaseTopCoarse(displays); });
-        document.getElementById('decreaseTopCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseTopCoarse) h.decreaseTopCoarse(displays); });
-
-        // پایین
-        document.getElementById('increaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottom) h.increaseBottom(displays); });
-        document.getElementById('decreaseBottomBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseBottom) h.decreaseBottom(displays); });
-        document.getElementById('increaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseBottomCoarse) h.increaseBottomCoarse(displays); });
-        document.getElementById('decreaseBottomCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseBottomCoarse) h.decreaseBottomCoarse(displays); });
-
-        // راست
-        document.getElementById('increaseRightBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseRight) h.increaseRight(displays); });
-        document.getElementById('decreaseRightBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseRight) h.decreaseRight(displays); });
-        document.getElementById('increaseRightCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseRightCoarse) h.increaseRightCoarse(displays); });
-        document.getElementById('decreaseRightCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseRightCoarse) h.decreaseRightCoarse(displays); });
-
-        // پهنا (جایگزین چپ)
-        document.getElementById('increaseWidthBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseWidth) h.increaseWidth(displays); });
-        document.getElementById('decreaseWidthBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseWidth) h.decreaseWidth(displays); });
-        document.getElementById('increaseWidthCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.increaseWidthCoarse) h.increaseWidthCoarse(displays); });
-        document.getElementById('decreaseWidthCoarseBtn').addEventListener('click', function() { var h = getHandlers(); if (h && h.decreaseWidthCoarse) h.decreaseWidthCoarse(displays); });
-
-        document.getElementById('applySpacingBtn').addEventListener('click', function() {
-            var block = identifyBlock();
-            var handlers = window.handlersRegistry[block] ? window.handlersRegistry[block].spacing : null;
-            if (handlers && handlers.applyStored) handlers.applyStored();
+            var bottomSpacer = document.createElement('div');
+            bottomSpacer.className = 'reportTosifi-spacer reportTosifi-spacer-bottom';
+            bottomSpacer.style.height = '0px';
+            card.parentNode.insertBefore(bottomSpacer, card.nextSibling);
         });
     }
 
-    createFloatingIcon();
-    createPanel();
+    function adjustSpacing(selector, amount, display) {
+        var spacers = document.querySelectorAll(selector);
+        var newHeight = 0;
+        spacers.forEach(function(spacer) {
+            var cur = parseInt(spacer.style.height) || 0;
+            newHeight = Math.max(0, cur + amount);
+            spacer.style.height = newHeight + 'px';
+        });
+        if (spacers.length > 0) {
+            if (selector === '.reportTosifi-spacer-top') lastTop = newHeight;
+            else if (selector === '.reportTosifi-spacer-bottom') lastBottom = newHeight;
+            if (display) display.textContent = newHeight;
+        }
+    }
+
+    function adjustRightMargin(amount) {
+        var blocks = document.querySelectorAll('[ng-repeat="rowItem in dataItems"]');
+        var newVal = 0;
+        blocks.forEach(function(block) {
+            var cur = parseInt(window.getComputedStyle(block).marginRight) || 0;
+            newVal = cur + amount;
+            block.style.setProperty('margin-right', newVal + 'px', 'important');
+        });
+        lastRight = newVal;
+        var display = document.getElementById('rightHeightDisp');
+        if (display) display.textContent = newVal;
+    }
+
+    function adjustWidth(amount) {
+        var blocks = document.querySelectorAll('[ng-repeat="rowItem in dataItems"]');
+        var newVal = lastWidth;
+        blocks.forEach(function(block) {
+            var cur = parseInt(window.getComputedStyle(block).width) || lastWidth;
+            newVal = cur + amount;
+            if (newVal < 500) newVal = 500;
+            if (newVal > 2000) newVal = 2000;
+            block.style.setProperty('width', newVal + 'px', 'important');
+            block.style.setProperty('max-width', newVal + 'px', 'important');
+        });
+        lastWidth = newVal;
+        var display = document.getElementById('widthDisp');
+        if (display) display.textContent = newVal;
+    }
+
+    function applyStored() {
+        ensureSpacersExist();
+        document.querySelectorAll('.reportTosifi-spacer-top').forEach(function(s) { s.style.height = lastTop + 'px'; });
+        document.querySelectorAll('.reportTosifi-spacer-bottom').forEach(function(s) { s.style.height = lastBottom + 'px'; });
+        document.querySelectorAll('[ng-repeat="rowItem in dataItems"]').forEach(function(card) {
+            card.style.setProperty('margin-right', lastRight + 'px', 'important');
+            card.style.setProperty('width', lastWidth + 'px', 'important');
+            card.style.setProperty('max-width', lastWidth + 'px', 'important');
+        });
+        updateDisplays();
+    }
+
+    function emptyFontHandler() {}
+
+    initStoredValues();
+
+    window.registerSection('reportTosifi', {
+        spacing: {
+            increaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-top', 1, d.topHeight); },
+            decreaseTop: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-top', -1, d.topHeight); },
+            increaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-top', 5, d.topHeight); },
+            decreaseTopCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-top', -5, d.topHeight); },
+            increaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-bottom', 1, d.bottomHeight); },
+            decreaseBottom: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-bottom', -1, d.bottomHeight); },
+            increaseBottomCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-bottom', 5, d.bottomHeight); },
+            decreaseBottomCoarse: function(d) { ensureSpacersExist(); adjustSpacing('.reportTosifi-spacer-bottom', -5, d.bottomHeight); },
+            increaseRight: function(d) { adjustRightMargin(1); },
+            decreaseRight: function(d) { adjustRightMargin(-1); },
+            increaseRightCoarse: function(d) { adjustRightMargin(5); },
+            decreaseRightCoarse: function(d) { adjustRightMargin(-5); },
+            increaseWidth: function(d) { adjustWidth(1); },
+            decreaseWidth: function(d) { adjustWidth(-1); },
+            increaseWidthCoarse: function(d) { adjustWidth(5); },
+            decreaseWidthCoarse: function(d) { adjustWidth(-5); },
+            applyStored: applyStored
+        },
+        fonts: {
+            increaseFontSizeTopMarklabel: emptyFontHandler,
+            decreaseFontSizeTopMarklabel: emptyFontHandler,
+            increaseFontSizeTopInfomark: emptyFontHandler,
+            decreaseFontSizeTopInfomark: emptyFontHandler,
+            increaseFontSizeMiddle: emptyFontHandler,
+            decreaseFontSizeMiddle: emptyFontHandler,
+            increaseFontSizeBottomMarklabel: emptyFontHandler,
+            decreaseFontSizeBottomMarklabel: emptyFontHandler,
+            increaseFontSizeBottomInfomark: emptyFontHandler,
+            decreaseFontSizeBottomInfomark: emptyFontHandler
+        }
+    });
 })();
