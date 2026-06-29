@@ -324,6 +324,11 @@
 
     function startDrag(e) {
         e.preventDefault();
+        // حذف right و تنظیم left بر اساس موقعیت فعلی
+        var rect = panel.getBoundingClientRect();
+        panel.style.right = 'auto';
+        panel.style.left = rect.left + 'px';
+        
         dragState.dragging = true;
         dragState.startX = e.clientX;
         dragState.startY = e.clientY;
