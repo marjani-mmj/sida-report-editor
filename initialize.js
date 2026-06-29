@@ -9,7 +9,8 @@
         'section-rookeshPayeei.js',
         'section-polomp.js',
         'section-amarKoli.js',
-        'section-reportTosifi.js'
+        'section-reportTosifi.js',
+        'panel-reportTosifi.js'        // جدید
     ];
 
     function loadScript(src) {
