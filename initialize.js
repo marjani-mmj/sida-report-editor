@@ -8,9 +8,7 @@
         'section-rookeshKoli.js',
         'section-rookeshPayeei.js',
         'section-polomp.js',
-        'section-amarKoli.js',
-        'section-reportTosifi.js',
-        'panel-reportTosifi.js'        // جدید
+        'section-amarKoli.js'
     ];
 
     function loadScript(src) {
