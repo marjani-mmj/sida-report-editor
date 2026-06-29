@@ -15,10 +15,10 @@
     }
 
     function updateDisplays() {
-        var dt = document.getElementById('topHeightDisp'); if (dt) dt.textContent = lastTop;
-        var db = document.getElementById('bottomHeightDisp'); if (db) db.textContent = lastBottom;
-        var dr = document.getElementById('rightHeightDisp'); if (dr) dr.textContent = lastRight;
-        var dw = document.getElementById('widthDisp'); if (dw) dw.textContent = lastWidth;
+        var dt = document.getElementById('reportTosifi-topHeightDisp'); if (dt) dt.textContent = lastTop;
+        var db = document.getElementById('reportTosifi-bottomHeightDisp'); if (db) db.textContent = lastBottom;
+        var dr = document.getElementById('reportTosifi-rightHeightDisp'); if (dr) dr.textContent = lastRight;
+        var dw = document.getElementById('reportTosifi-widthDisp'); if (dw) dw.textContent = lastWidth;
     }
 
     function ensureSpacersExist() {
@@ -62,7 +62,7 @@
             block.style.setProperty('margin-right', newVal + 'px', 'important');
         });
         lastRight = newVal;
-        var display = document.getElementById('rightHeightDisp');
+        var display = document.getElementById('reportTosifi-rightHeightDisp');
         if (display) display.textContent = newVal;
     }
 
@@ -78,7 +78,7 @@
             block.style.setProperty('max-width', newVal + 'px', 'important');
         });
         lastWidth = newVal;
-        var display = document.getElementById('widthDisp');
+        var display = document.getElementById('reportTosifi-widthDisp');
         if (display) display.textContent = newVal;
     }
 
